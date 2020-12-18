@@ -29,12 +29,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             sending_sock.connect((server_s[0], int(server_s[1]) if len(server_s) == 2 else 5003))
         except (socket.timeout, TimeoutError):
-            return func.HttpResponse(f"Hello, {uuid}, we failed to connect to {server}. This HTTP triggered function executed successfully.", status_code=500)
+            return func.HttpResponse(f"Hello, {uuid}, we failed to connect to {server}. This HTTP triggered function executed successfully.", status_code=200)
 
         command = interp.process_instruction(transcript)
         if command is None:
             sending_sock.close()
-            return func.HttpResponse(f"Hello, {uuid}, we failed to parse \"{transcript}\". This Http triggered function executed successfully.", status_code=500)
+            return func.HttpResponse(f"Hello, {uuid}, we failed to parse \"{transcript}\". This Http triggered function executed successfully.", status_code=200)
         
         command['client_name'] = uuid
         sending_sock.send((json.dumps(command) + "\n").encode())
