@@ -33,6 +33,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         command = interp.process_instruction(transcript)
         if command is None:
+            sending_sock.close()
             return func.HttpResponse(f"Hello, {uuid}, we failed to parse \"{transcript}\". This Http triggered function executed successfully.", status_code=500)
         
         command['client_name'] = uuid
