@@ -29,18 +29,31 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             sending_sock.connect((server_s[0], int(server_s[1]) if len(server_s) == 2 else 5003))
         except (socket.timeout, TimeoutError):
-            return func.HttpResponse(f"Hello, {uuid}, we failed to connect to {server}. This HTTP triggered function executed successfully.", status_code=200)
+            logging.info(f'Python HTTP trigger function failed to connect to {server}.')
+            return func.HttpResponse(
+                f"Hello, {uuid}, we failed to connect to {server}. This HTTP triggered function executed successfully.",
+                status_code=200
+            )
 
         command = interp.process_instruction(transcript)
         if command is None:
             sending_sock.close()
-            return func.HttpResponse(f"Hello, {uuid}, we failed to parse \"{transcript}\". This Http triggered function executed successfully.", status_code=200)
+            logging.info(f'Python HTTP trigger function failed to parse \"{transcript}\" from {uuid}.')
+            return func.HttpResponse(
+                f"Hello, {uuid}, we failed to parse \"{transcript}\". This Http triggered function executed successfully.",
+                status_code=200
+            )
         
         command['client_name'] = uuid
         sending_sock.send((json.dumps(command) + "\n").encode())
-        sending_sock.close()      
-        return func.HttpResponse(f"Hello, {uuid}, we've sent {command} to {server}. This HTTP triggered function executed successfully.", status_code=200)
+        sending_sock.close()     
+        logging.info(f'Python HTTP trigger function successfully parsed \"{transcript}\" from {uuid} to {command}.') 
+        return func.HttpResponse(
+            f"Hello, {uuid}, we've sent {command} to {server}. This HTTP triggered function executed successfully.",
+            status_code=200
+        )
     else:
+        logging.info('Python HTTP trigger function did not receive all required data.')
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass a uuid, transcript, and server in the query string or in the request body.",
              status_code=200
